@@ -9,8 +9,20 @@ This means that there *isn't actually a lot of code* in the `dkist` package, and
 
 The upshot of this when using the DKIST Python tools is that you will mostly not be (directly) using functionality provided by the `dkist` package.
 You will need to be familiar with the other packages in the ecosystem to make use of the tools provided here.
-The main things you will need to know are the `sunpy.net.Fido` and `ndcube.NDCube` classes.
 
+DKIST and the Scientific Python Ecosystem
+-----------------------------------------
+
+Python is a modular language, which allows you to build, distribute and import custom libraries for specialist functionality on top of what's provided by the language itself.
+This being the case, a significant body of third-party code has grown up over the last couple of decades to form a core set of scientific libraries which are commonly used for a scientific analysis.
+Chief among these are `numpy`, `scipy` and `matplotlib`.
+Specifically in the fields of astronomy and solar physics, the go-to libraries are `astropy` and `sunpy`.
+
+These packages, along with NDCube, are the core components of the DKIST tools.
+There are many parts of these packages which are useful when working with DKIST data, which you should explore on their respective documentation pages.
+The main things you will need to be familiar with are the {obj}`sunpy.net.Fido` and {obj}`ndcube.NDCube` classes.
+Additionally you will find it useful to have some knowledge of `astropy.units`, `astropy.wcs`, `astropy.coordinates` and `sunpy.coordinates`.
+These topics are all covered in the :ref:`dkist:tutorial:index`.
 
 Technical Details
 -----------------
