@@ -10,76 +10,8 @@ kernelspec:
   display_name: Python 3
   language: python
   name: python3
----
+  ---
 # Astropy and SunPy - A Quick Primer
-
-## Units
-
-Astropy provides a subpackage {obj}`astropy.units` which provides tools for associating physical units with numbers and arrays.
-This lets you do mathematical operations on these arrays while propagating the units.
-
-To get started we import `astropy.units` because we are going to be using this a lot, we import it as `u`.
-```{code-cell} python
-import astropy.units as u
-```
-
-Now we can access various units as such:
-```{code-cell} python
-u.m
-```
-
-```{code-cell} python
-u.kg
-```
-
-We can now attach a unit to a number:
-```{code-cell} python
-length = 10 * u.m
-length
-```
-
-We can also compose multiple quantities (a number with a unit):
-
-```{code-cell} python
-
-speed = length / (30 * u.min)
-speed
-```
-
-Using the `.to()` method on a `u.Quantity` object lets you convert a quantity to a different unit.
-
-```{code-cell} python
-speed.to(u.km/u.h)
-```
-
-### Equivalencies
-
-Some conversions are not done by a conversion factor as between miles and kilometers – for example converting between wavelength and frequency:
-
-```{code-cell} python
----
-tags: [raises-exception]
----
-(656.281 * u.nm).to(u.Hz)  # Fails because they are not compatible
-```
-
-However we can make use of a spectral *equivalency* to indicate the link between the units:
-
-```{code-cell} python
-(656.281 * u.nm).to(u.Hz, equivalencies=u.spectral())
-```
-
-### Constants
-
-The `astropy.constants` sub-package provides a set of physical constants which are compatible with the units/quantities framework:
-
-```{code-cell} python
-from astropy.constants import M_sun, c
-```
-```{code-cell} python
-E = 3 * M_sun * c ** 2
-E.to(u.J)
-```
 
 ## Coordinates
 
