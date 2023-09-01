@@ -5,12 +5,12 @@ Astropy units
 
 The `astropy.units` package is used throughout the Python Tools and in several of its dependencies, such as `sunpy`.
 This guide will describe some features of `units` that it is useful to know about while using the Python Tools.
-For more detail on using `astropy.units` you should see the `astropy` docs [LINK]
+For more detail on using `astropy.units` you should see the `astropy.units` `documentation <https://docs.astropy.org/en/stable/units>`__.
 
 Equivalencies
 -------------
 
-As described in the tutorial [LINK], `Quantity` objects can be converted from one unit to another, for example:
+As described in :ref:`dkist:tutorial:astropy-and-sunpy-a-quick-primer`, `Quantity` objects can be converted from one unit to another, for example:
 
 .. code-block:: python
 
