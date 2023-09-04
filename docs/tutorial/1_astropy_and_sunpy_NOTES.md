@@ -12,55 +12,7 @@ kernelspec:
   name: python3
   ---
 # Astropy and SunPy - A Quick Primer
-
 ## Coordinates
-
-The Astropy coordinates submodule {obj}`astropy.coordinates` provides classes to represent physical coordinates with all their associated metadata, and transform them between different coordinate systems.
-Currently, {obj}`astropy.coordinates` supports:
-
-* Spatial coordinates via {obj}`astropy.coordinates.SkyCoord`
-* Spectral coordinates via {obj}`astropy.coordinates.SpectralCoord`
-* Stokes profiles via {obj}`astropy.coordinates.StokesCoord` (coming soon)
-
-### Spatial Coordinates
-
-SunPy provides extensions to the Astropy coordinate system to represent common solar physics frames.
-So to use the sunpy coordinates we have to first import {obj}`sunpy.coordinates` which registers them with astropy.
-
-```{code-cell} python
-import sunpy.coordinates
-from astropy.coordinates import SkyCoord
-```
-
-We can now create a `SkyCoord` object representing a point on the Sun:
-
-```{code-cell} python
-SkyCoord(10*u.arcsec, 20*u.arcsec, frame="helioprojective")
-```
-
-This is the most minimal version of this coordinate frame, however, it isn't very useful as we haven't provided enough information to be able to transform it to other frames.
-This is because helioprojective is an observer centred coordinate frame, so we need to know where in inertial space the observer is.
-One way of doing this is to say the observer is on Earth at a specific time:
-
-```{code-cell} python
-hpc1 = SkyCoord(10*u.arcsec, 20*u.arcsec, frame="helioprojective",
-                obstime="2023-05-21T04:00:00", observer="earth")
-hpc1
-```
-
-This coordinate can now be converted to other frames, such as heliographic coordinates:
-
-```{code-cell} python
-hpc1.transform_to("heliographic_stonyhurst")
-```
-
-There are few things to notice about the difference between these two `SkyCoord` objects:
-
-1. The default representation of the latitude and longitude is now in degrees as is conventional.
-1. The heliographic frame is three dimensional (it has a radius), when the input frame was not. This is because the distance from the observer was calculated using the `rsun` attribute.
-1. The `obstime` and `rsun` attributes are still present, but the `observer` attribute isn't. This is because heliographic coordinates are not observer dependent.
-1. The `obstime` attribute is still important to transform to other frames, as the heliographic frame needs to know the location of Earth.
-
 ### Spectral Coordinates
 
 {obj}`astropy.coordinates.SpectralCoord` is a `Quantity` like object which also holds information about the observer and target coordinates and relative velocities.
