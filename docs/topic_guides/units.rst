@@ -1,4 +1,4 @@
-.._dkist:topic-guides:units:
+.. _dkist:topic-guides:units:
 
 Astropy units
 =============
