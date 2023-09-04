@@ -10,7 +10,7 @@ For more detail on using `astropy.units` you should see the `astropy.units` `doc
 Equivalencies
 -------------
 
-As described in :ref:`dkist:tutorial:astropy-and-sunpy-a-quick-primer`, `Quantity` objects can be converted from one unit to another, for example:
+As described in :ref:`dkist:tutorial:astropy-and-sunpy`, `Quantity` objects can be converted from one unit to another, for example:
 
 .. code-block:: python
 
