@@ -126,7 +126,7 @@ from astropy.coordinates import SpectralCoord
 from sunpy.coordinates import get_earth
 ```
 
-`SpectralCoord` does not automatically make the HPC coordinate 3D, but wants the distance, so we do it explicitally:
+`SpectralCoord` does not automatically make the HPC coordinate 3D, but wants the distance, so we do it explicitly:
 
 ```{code-cell} python
 hpc2 = hpc1.make_3d()
