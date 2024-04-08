@@ -1,5 +1,6 @@
 from abc import ABC
 from typing import Literal
+from itertools import product
 from collections.abc import Iterable
 
 import numpy as np
@@ -12,6 +13,7 @@ except ImportError:
 import astropy.modeling.models as m
 import astropy.units as u
 from astropy.modeling import CompoundModel, Model, Parameter, separable
+from astropy.wcs import WCS
 
 __all__ = [
     "CoupledCompoundModel",
@@ -31,6 +33,7 @@ __all__ = [
 
 
 def generate_celestial_transform(
+        wcs,
         crpix: Iterable[float] | u.Quantity,
         cdelt: Iterable[float] | u.Quantity,
         pc: ArrayLike | u.Quantity,
@@ -89,11 +92,13 @@ def generate_celestial_transform(
         lon_pole = u.Quantity(lon_pole)
         pc = u.Quantity(pc)
 
-    shift = m.Shift(-crpix[0]) & m.Shift(-crpix[1])
-    scale = m.Multiply(cdelt[0]) & m.Multiply(cdelt[1])
-    rot = m.AffineTransformation2D(pc, translation=translation)
-    skyrot = m.RotateNative2Celestial(crval[0], crval[1], lon_pole)
-    return shift | rot | scale | projection | skyrot
+    wcs.wcs.crpix = crpix.value
+    wcs.wcs.cdelt = cdelt.value
+    wcs.wcs.crval = crval.value
+    wcs.wcs.lonpole = lon_pole.value
+    wcs.wcs.pc = pc.value
+
+    return wcs
 
 
 class BaseVaryingCelestialTransform(Model, ABC):
@@ -168,6 +173,9 @@ class BaseVaryingCelestialTransform(Model, ABC):
         if len(self.table_shape) != self.n_inputs-2:
             raise ValueError(f"This model can only be constructed with a {self.n_inputs-2}-dimensional lookup table.")
 
+        self._transform_wcs = WCS(header={"CDELT1": 1, "CDELT2": 1, "CUNIT1": "arcsec", "CUNIT2": "arcsec",
+                                          "CRPIX1": 0, "CRPIX2": 0})
+
     def transform_at_index(self, ind, crpix=None, cdelt=None, lon_pole=None):
         """
         Generate a spatial model based on an index for the pc and crval tables.
@@ -198,6 +206,7 @@ class BaseVaryingCelestialTransform(Model, ABC):
             return m.Const1D(fill_val) & m.Const1D(fill_val)
 
         return generate_celestial_transform(
+            self._transform_wcs,
             crpix=crpix,
             cdelt=cdelt,
             pc=self.pc_table[ind],
@@ -205,7 +214,6 @@ class BaseVaryingCelestialTransform(Model, ABC):
             lon_pole=lon_pole,
             projection=self.projection,
         )
-
 
     def _map_transform(self, *arrays, crpix, cdelt, lon_pole, inverse=False):
         # We need to broadcast the arrays together so they are all the same shape
@@ -239,7 +247,7 @@ class BaseVaryingCelestialTransform(Model, ABC):
             if inverse:
                 xx, yy = sct.inverse(barrays[0][mask], barrays[1][mask])
             else:
-                xx, yy = sct(barrays[0][mask], barrays[1][mask])
+                xx, yy = sct.pixel_to_world(barrays[0][mask], barrays[1][mask])
 
             if isinstance(xx, u.Quantity):
                 x_out[mask], y_out[mask] = xx.value, yy.value
@@ -261,6 +269,7 @@ class BaseVaryingCelestialTransform(Model, ABC):
         kwargs = inputs[self.n_inputs:]
         keys = ["crpix", "cdelt", "lon_pole"]
         kwargs = dict(zip(keys, kwargs))
+
         return self._map_transform(*arrays, inverse=self._is_inverse, **kwargs)
 
     @property
@@ -335,6 +344,7 @@ class VaryingCelestialTransform3D(BaseVaryingCelestialTransform):
 class InverseVaryingCelestialTransform(BaseVaryingCelestialTransform):
     n_inputs = 3
     _is_inverse = True
+
 
 class InverseVaryingCelestialTransform2D(BaseVaryingCelestialTransform):
     n_inputs = 4
