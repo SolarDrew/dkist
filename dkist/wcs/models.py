@@ -174,7 +174,7 @@ class BaseVaryingCelestialTransform(Model, ABC):
             raise ValueError(f"This model can only be constructed with a {self.n_inputs-2}-dimensional lookup table.")
 
         self._transform_wcs = WCS(header={"CDELT1": 1, "CDELT2": 1, "CUNIT1": "arcsec", "CUNIT2": "arcsec",
-                                          "CRPIX1": 0, "CRPIX2": 0})
+                                          "CRPIX1": 0, "CRPIX2": 0, "CTYPE1": "TAN", "CYTPE2": "TAN"})
 
     def transform_at_index(self, ind, crpix=None, cdelt=None, lon_pole=None):
         """
