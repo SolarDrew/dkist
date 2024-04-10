@@ -13,7 +13,6 @@ except ImportError:
 import astropy.modeling.models as m
 import astropy.units as u
 from astropy.modeling import CompoundModel, Model, Parameter, separable
-from astropy.wcs import WCS
 
 __all__ = [
     "CoupledCompoundModel",
@@ -33,7 +32,7 @@ __all__ = [
 
 
 def generate_celestial_transform(
-        wcs,
+        transform,
         crpix: Iterable[float] | u.Quantity,
         cdelt: Iterable[float] | u.Quantity,
         pc: ArrayLike | u.Quantity,
@@ -92,13 +91,12 @@ def generate_celestial_transform(
         lon_pole = u.Quantity(lon_pole)
         pc = u.Quantity(pc)
 
-    wcs.wcs.crpix = crpix.value
-    wcs.wcs.cdelt = cdelt.value
-    wcs.wcs.crval = crval.value
-    wcs.wcs.lonpole = lon_pole.value
-    wcs.wcs.pc = pc.value
+    new_params = [-crpix[0], -crpix[1], pc, translation, cdelt[0], cdelt[1], crval[0], crval[1], lon_pole]
 
-    return wcs
+    for name, val in zip(transform.param_names, new_params):
+        setattr(transform, name, val)
+
+    return transform
 
 
 class BaseVaryingCelestialTransform(Model, ABC):
@@ -173,8 +171,11 @@ class BaseVaryingCelestialTransform(Model, ABC):
         if len(self.table_shape) != self.n_inputs-2:
             raise ValueError(f"This model can only be constructed with a {self.n_inputs-2}-dimensional lookup table.")
 
-        self._transform_wcs = WCS(header={"CDELT1": 1, "CDELT2": 1, "CUNIT1": "arcsec", "CUNIT2": "arcsec",
-                                          "CRPIX1": 0, "CRPIX2": 0, "CTYPE1": "TAN", "CYTPE2": "TAN"})
+        shift = m.Shift(0) & m.Shift(0)
+        rot = m.AffineTransformation2D(np.array([[0, 0], [0, 0]]), translation=np.array([0, 0]))
+        scale = m.Multiply(0) & m.Multiply(0)
+        skyrot = m.RotateNative2Celestial(0, 0, 180)
+        self._transform = shift | rot | scale | projection | skyrot
 
     def transform_at_index(self, ind, crpix=None, cdelt=None, lon_pole=None):
         """
@@ -203,11 +204,10 @@ class BaseVaryingCelestialTransform(Model, ABC):
         if isinstance(crpix, u.Quantity):
             fill_val = np.nan * u.deg
         if (np.array(ind) > np.array(self.table_shape) - 1).any() or (np.array(ind) < 0).any():
-            return WCS(header={"CDELT1": 1, "CDELT2": 1, "CUNIT1": "arcsec", "CUNIT2": "arcsec",
-                               "CRPIX1": 0, "CRPIX2": 0, "CTYPE1": "TAN", "CYTPE2": "TAN"})
+            return m.Const1D(fill_val) & m.Const1D(fill_val)
 
         return generate_celestial_transform(
-            self._transform_wcs,
+            self._transform,
             crpix=crpix,
             cdelt=cdelt,
             pc=self.pc_table[ind],
@@ -248,7 +248,7 @@ class BaseVaryingCelestialTransform(Model, ABC):
             if inverse:
                 xx, yy = sct.inverse(barrays[0][mask], barrays[1][mask])
             else:
-                xx, yy = sct.pixel_to_world(barrays[0][mask], barrays[1][mask])
+                xx, yy = sct(barrays[0][mask], barrays[1][mask])
 
             if isinstance(xx, u.Quantity):
                 x_out[mask], y_out[mask] = xx.value, yy.value
