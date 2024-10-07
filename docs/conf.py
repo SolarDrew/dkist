@@ -44,11 +44,36 @@ project = "DKIST"
 author = "NSO / AURA"
 copyright = f"{datetime.datetime.now().year}, {author}"
 
+<<<<<<<
 # The full version, including alpha/beta/rc tags
 release = __version__
 dkist_version = Version(__version__)
 is_release = not(dkist_version.is_prerelease or dkist_version.is_devrelease)
 
+=======
+import datetime
+
+from packaging.version import Version
+
+# -- Project information -----------------------------------------------------
+
+# The full version, including alpha/beta/rc tags
+from dkist import __version__
+
+_version = Version(__version__)
+version = release = str(_version)
+# Avoid "post" appearing in version string in rendered docs
+if _version.is_postrelease:
+    version = release = _version.base_version
+# Avoid long githashes in rendered Sphinx docs
+elif _version.is_devrelease:
+    version = release = f"{_version.base_version}.dev{_version.dev}"
+is_development = _version.is_devrelease
+is_release = not(_version.is_prerelease or _version.is_devrelease)
+
+project = "dkist"
+author = "NSO / AURA"
+>>>>>>>
 # We want to ignore all warnings in a release version.
 if is_release:
     warnings.simplefilter("ignore")
@@ -91,7 +116,14 @@ extensions = [
 # Add any extra paths that contain custom files (such as robots.txt or
 # .htaccess) here, relative to this directory. These files are copied
 
+<<<<<<<
 exclude_patterns = ["_build", "Thumbs.db", ".DS_Store", "jupyter_execute", "**/*_NOTES.md"]
+=======
+# Treat everything in single ` as a Python reference.
+default_role = "py:obj"
+
+# -- Options for intersphinx extension ---------------------------------------
+>>>>>>>
 
 # The suffix(es) of source filenames.
 # You can specify multiple suffix as a list of string:
