@@ -109,12 +109,6 @@ one_pix
 fig = one_pix.plot()
 ```
 
-Well that doesn't seem right, it doesn't have an x-axis.
-
-```{code-cell} ipython3
-one_pix.axis_world_coords()
-```
-
 ## Profiles
 
 ```{code-cell} ipython3
@@ -126,9 +120,10 @@ inv.profiles["NaID_orig"]
 ```
 
 ```{code-cell} ipython3
-inv.plot(0)
+fig = plt.figure(figsize=(12, 18))
+inv.profiles.plot((0, 0))
 ```
 
 ```{code-cell} ipython3
-
+inv.meta
 ```
