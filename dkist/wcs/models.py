@@ -275,6 +275,10 @@ class RefractedAngleSineModel(_GrismEquationBase):
 
     @staticmethod
     def _wavelength_offset(pixel, reference_pixel, dispersion):
+        if isinstance(pixel, u.Quantity):
+            pixel = pixel.to_value(u.pix)
+        if isinstance(reference_pixel, u.Quantity):
+            reference_pixel = reference_pixel.to_value(u.pix)
         pixel_offset = pixel - reference_pixel
         if isinstance(dispersion, u.Quantity):
             pixel_offset = pixel_offset * u.pix
